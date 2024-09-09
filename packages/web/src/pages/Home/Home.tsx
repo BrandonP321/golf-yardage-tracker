@@ -85,12 +85,15 @@ function Home(props: Home.Props) {
         {({ values }) => (
           <Form className={styles.form}>
             <h2>Stock Yardage</h2>
+            <br/>
+            <p>Distance</p>
             <Field
               name="distance"
               type="number"
               className={styles.field}
               placeholder="Distance"
             />
+            <p>Temperature</p>
             <Field
               name="stockTemperature"
               type="number"
@@ -103,12 +106,14 @@ function Home(props: Home.Props) {
               className={styles.field}
               placeholder="Humidity"
             /> */}
+            <p>Altitude</p>
             <Field
               name="stockAltitude"
               type="number"
               className={styles.field}
               placeholder="Altitude"
             />
+            <p>Tailwind MPH</p>
             <Field
               name="stockTailwindMph"
               type="number"
@@ -119,6 +124,9 @@ function Home(props: Home.Props) {
             <br />
 
             <h2>Current Conditions</h2>
+            <br/>
+
+            <p>Temperature</p>
             <Field
               name="newTemperature"
               type="number"
@@ -131,12 +139,14 @@ function Home(props: Home.Props) {
               className={styles.field}
               placeholder="Humidity"
             /> */}
+            <p>Altitude</p>
             <Field
               name="newAltitude"
               type="number"
               className={styles.field}
               placeholder="Altitude"
             />
+            <p>Tailwind MPH</p>
             <Field
               name="newTailwindMph"
               type="number"
