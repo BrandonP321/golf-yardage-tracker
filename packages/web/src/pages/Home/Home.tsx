@@ -2,17 +2,53 @@ import { FormikSubmit } from "../../utils/FormikUtils";
 import styles from "./Home.module.scss";
 import { Field, Form, Formik } from "formik";
 
+type WindConditions = {
+  speed: number;
+  direction: number;
+};
+
 type Conditions = {
   temperature: number;
   humidity: number;
   altitude: number;
-  tailwindMph: number;
+  wind: WindConditions;
 };
 
 type Yardage = Conditions & {
   club: string;
   distance: number;
 };
+
+function getWindAdjustment(
+  distance: number,
+  stockWind: WindConditions,
+  currentWind: WindConditions
+): number {
+  // Helper function to calculate the wind adjustment based on wind speed and direction
+  function calculateWindEffect(wind: WindConditions): number {
+    // Assuming a basic factor where every 10 mph wind affects yardage by about 2% in either direction.
+    const windFactorPer10mph = 0.02; // 2% adjustment per 10 mph
+    const angleRadians = (wind.direction * Math.PI) / 180; // Convert angle to radians
+
+    // Calculate the longitudinal wind component (cosine of the angle)
+    const longitudinalWindComponent = wind.speed * Math.cos(angleRadians);
+
+    // Calculate the percentage adjustment based on wind speed
+    const windAdjustment =
+      (longitudinalWindComponent / 10) * windFactorPer10mph;
+
+    return windAdjustment;
+  }
+
+  const stockWindAdjustment = calculateWindEffect(stockWind);
+  const currentWindAdjustment = calculateWindEffect(currentWind);
+
+  const totalWindAdjustment = currentWindAdjustment - stockWindAdjustment;
+
+  const adjustedYardage = distance * totalWindAdjustment;
+
+  return adjustedYardage;
+}
 
 function getAdjustedYardage(stock: Yardage, conditions: Conditions): number {
   const { distance } = stock;
@@ -23,30 +59,15 @@ function getAdjustedYardage(stock: Yardage, conditions: Conditions): number {
   // 2% more distance for every 1,000 feet of altitude increase
   const altitudeAdjustment =
     ((conditions.altitude - stock.altitude) / 1000) * (distance * 0.02);
-  // For every 10mph increase in tailwind, add 2% to the distance
-  const tailwindAdjustment =
-    ((conditions.tailwindMph - stock.tailwindMph) / 10) * (distance * 0.02);
 
-  return (
-    distance + temperatureAdjustment + altitudeAdjustment + tailwindAdjustment
+  const windAdjustment = getWindAdjustment(
+    distance,
+    stock.wind,
+    conditions.wind
   );
+
+  return distance + temperatureAdjustment + altitudeAdjustment + windAdjustment;
 }
-
-const tempStockYardage: Yardage = {
-  club: "7i",
-  distance: 150,
-  temperature: 70,
-  humidity: 50,
-  altitude: 0,
-  tailwindMph: 0,
-};
-
-const tempNewConditions: Conditions = {
-  temperature: 70,
-  humidity: 50,
-  altitude: 0,
-  tailwindMph: 10,
-};
 
 namespace Home {
   export type Props = {};
@@ -56,12 +77,14 @@ type Values = {
   stockTemperature: number;
   stockHumidity: number;
   stockAltitude: number;
-  stockTailwindMph: number;
+  stockWindDirection: number;
+  stockWindSpeed: number;
   distance: number;
   newTemperature: number;
   newHumidity: number;
   newAltitude: number;
-  newTailwindMph: number;
+  newWindDirection: number;
+  newWindSpeed: number;
 };
 
 function Home(props: Home.Props) {
@@ -76,7 +99,8 @@ function Home(props: Home.Props) {
             stockTemperature: 70,
             stockAltitude: 0,
             stockHumidity: 0,
-            stockTailwindMph: 0,
+            stockWindDirection: 0,
+            stockWindSpeed: 0,
             newTemperature: 70,
           } as Values
         }
@@ -85,7 +109,7 @@ function Home(props: Home.Props) {
         {({ values }) => (
           <Form className={styles.form}>
             <h2>Stock Yardage</h2>
-            <br/>
+            <br />
             <p>Distance</p>
             <Field
               name="distance"
@@ -113,18 +137,25 @@ function Home(props: Home.Props) {
               className={styles.field}
               placeholder="Altitude"
             />
-            <p>Tailwind MPH</p>
+            <p>Wind Speed</p>
             <Field
-              name="stockTailwindMph"
+              name="stockWindSpeed"
               type="number"
               className={styles.field}
               placeholder="Tailwind MPH"
+            />
+            <p>Wind Direction</p>
+            <Field
+              name="stockWindDirection"
+              type="number"
+              className={styles.field}
+              placeholder="Wind Direction"
             />
 
             <br />
 
             <h2>Current Conditions</h2>
-            <br/>
+            <br />
 
             <p>Temperature</p>
             <Field
@@ -146,12 +177,19 @@ function Home(props: Home.Props) {
               className={styles.field}
               placeholder="Altitude"
             />
-            <p>Tailwind MPH</p>
+            <p>Wind Speed</p>
             <Field
-              name="newTailwindMph"
+              name="newWindSpeed"
               type="number"
               className={styles.field}
               placeholder="Tailwind MPH"
+            />
+            <p>Wind Direction</p>
+            <Field
+              name="newWindDirection"
+              type="number"
+              className={styles.field}
+              placeholder="Wind Direction"
             />
 
             <br />
@@ -165,13 +203,19 @@ function Home(props: Home.Props) {
                   club: "7i",
                   distance: values.distance ?? 0,
                   humidity: values.stockHumidity ?? 0,
-                  tailwindMph: values.stockTailwindMph ?? 0,
+                  wind: {
+                    direction: values.stockWindDirection ?? 0,
+                    speed: values.stockWindSpeed ?? 0,
+                  },
                   temperature: values.stockTemperature ?? 0,
                 },
                 {
                   altitude: values.newAltitude ?? 0,
                   humidity: values.newHumidity ?? 0,
-                  tailwindMph: values.newTailwindMph ?? 0,
+                  wind: {
+                    direction: values.newWindDirection ?? 0,
+                    speed: values.newWindSpeed ?? 0,
+                  },
                   temperature: values.newTemperature ?? 0,
                 }
               )}
