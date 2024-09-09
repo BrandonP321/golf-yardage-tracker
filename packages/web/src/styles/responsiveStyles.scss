@@ -1,0 +1,10 @@
+@import "./uiBase.scss";
+
+@mixin mobileStyle($var, $value) {
+  @include mobileVW() {
+    #{$var}: $value;
+  }
+}
+
+:root {
+}

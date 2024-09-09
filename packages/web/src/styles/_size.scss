@@ -1,0 +1,34 @@
+// ======================================================================================================
+// SIZE
+// ======================================================================================================
+// XXL
+$sizeXXLVar: --size-xxl;
+$sizeXXL: var(#{$sizeXXLVar}, 3rem);
+// XL
+$sizeXLVar: --size-xl;
+$sizeXL: var(#{$sizeXLVar}, 2.5rem);
+// L
+$sizeLVar: --size-l;
+$sizeL: var(#{$sizeLVar}, 2rem);
+// M
+$sizeMVar: --size-m;
+$sizeM: var(#{$sizeMVar}, 1.5rem);
+// S
+$sizeSVar: --size-s;
+$sizeS: var(#{$sizeSVar}, 1rem);
+// XS
+$sizeXSVar: --size-xs;
+$sizeXS: var(#{$sizeXSVar}, 0.5rem);
+// XXS
+$sizeXXSVar: --size-xxs;
+$sizeXXS: var(#{$sizeXXSVar}, 0.25rem);
+
+$sizeMap: (
+  "xxl": $sizeXXL,
+  "xl": $sizeXL,
+  "l": $sizeL,
+  "m": $sizeM,
+  "s": $sizeS,
+  "xs": $sizeXS,
+  "xxs": $sizeXXS,
+);
