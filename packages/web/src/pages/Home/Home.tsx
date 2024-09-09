@@ -17,9 +17,9 @@ type Yardage = Conditions & {
 function getAdjustedYardage(stock: Yardage, conditions: Conditions): number {
   const { distance } = stock;
 
-  // 10 yards longer for every 10 degrees warmer
+  // 2 yards longer for every 10 degrees warmer
   const temperatureAdjustment =
-    (conditions.temperature - stock.temperature) / 5;
+    ((conditions.temperature - stock.temperature) / 10) * 2;
   // 2% more distance for every 1,000 feet of altitude increase
   const altitudeAdjustment =
     ((conditions.altitude - stock.altitude) / 1000) * (distance * 0.02);
@@ -69,7 +69,19 @@ function Home(props: Home.Props) {
 
   return (
     <div>
-      <Formik initialValues={{} as Values} onSubmit={handleSubmit}>
+      <Formik
+        initialValues={
+          {
+            distance: 150,
+            stockTemperature: 70,
+            stockAltitude: 0,
+            stockHumidity: 0,
+            stockTailwindMph: 0,
+            newTemperature: 70,
+          } as Values
+        }
+        onSubmit={handleSubmit}
+      >
         {({ values }) => (
           <Form className={styles.form}>
             <h2>Stock Yardage</h2>
