@@ -1,73 +1,7 @@
 import { FormikSubmit } from "../../utils/FormikUtils";
 import styles from "./Home.module.scss";
 import { Field, Form, Formik } from "formik";
-
-type WindConditions = {
-  speed: number;
-  direction: number;
-};
-
-type Conditions = {
-  temperature: number;
-  humidity: number;
-  altitude: number;
-  wind: WindConditions;
-};
-
-type Yardage = Conditions & {
-  club: string;
-  distance: number;
-};
-
-function getWindAdjustment(
-  distance: number,
-  stockWind: WindConditions,
-  currentWind: WindConditions
-): number {
-  // Helper function to calculate the wind adjustment based on wind speed and direction
-  function calculateWindEffect(wind: WindConditions): number {
-    // Assuming a basic factor where every 10 mph wind affects yardage by about 2% in either direction.
-    const windFactorPer10mph = 0.02; // 2% adjustment per 10 mph
-    const angleRadians = (wind.direction * Math.PI) / 180; // Convert angle to radians
-
-    // Calculate the longitudinal wind component (cosine of the angle)
-    const longitudinalWindComponent = wind.speed * Math.cos(angleRadians);
-
-    // Calculate the percentage adjustment based on wind speed
-    const windAdjustment =
-      (longitudinalWindComponent / 10) * windFactorPer10mph;
-
-    return windAdjustment;
-  }
-
-  const stockWindAdjustment = calculateWindEffect(stockWind);
-  const currentWindAdjustment = calculateWindEffect(currentWind);
-
-  const totalWindAdjustment = currentWindAdjustment - stockWindAdjustment;
-
-  const adjustedYardage = distance * totalWindAdjustment;
-
-  return adjustedYardage;
-}
-
-function getAdjustedYardage(stock: Yardage, conditions: Conditions): number {
-  const { distance } = stock;
-
-  // 2 yards longer for every 10 degrees warmer
-  const temperatureAdjustment =
-    ((conditions.temperature - stock.temperature) / 10) * 2;
-  // 2% more distance for every 1,000 feet of altitude increase
-  const altitudeAdjustment =
-    ((conditions.altitude - stock.altitude) / 1000) * (distance * 0.02);
-
-  const windAdjustment = getWindAdjustment(
-    distance,
-    stock.wind,
-    conditions.wind
-  );
-
-  return distance + temperatureAdjustment + altitudeAdjustment + windAdjustment;
-}
+import { WeatherAdjustments } from "@yardage-tracker/shared/src/utils/WeatherAdjustments";
 
 namespace Home {
   export type Props = {};
@@ -197,7 +131,7 @@ function Home(props: Home.Props) {
 
             <p>
               New distance:{" "}
-              {getAdjustedYardage(
+              {WeatherAdjustments.getAdjustedYardage(
                 {
                   altitude: values.stockAltitude ?? 0,
                   club: "7i",
