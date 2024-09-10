@@ -4,7 +4,7 @@ export type WindConditions = {
 };
 
 export class WindAdjustments {
-  private static windFactorPer10mph = 0.02; // 2% adjustment per 10 mph
+  private static windFactorPer10mph = 0.02;
 
   private static calculateWindEffect(wind: WindConditions): number {
     const windFactorPer10mph = this.windFactorPer10mph;

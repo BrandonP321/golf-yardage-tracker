@@ -15,24 +15,32 @@ export type WeatherConditions = {
 class SimpleAdjustmentFactor {
   factor: number;
   isPercentage: boolean;
+  per: number;
 
-  constructor(params: { factor: number; isPercentage: boolean }) {
+  constructor(params: { factor: number; isPercentage: boolean; per: number }) {
     this.factor = params.factor;
+    this.per = params.per;
     this.isPercentage = params.isPercentage;
   }
 
-  getAdjustment(change: number): number {
-    return this.isPercentage ? change * this.factor : this.factor;
+  getAdjustment(change: number, distance: number): number {
+    change = change / this.per;
+
+    return this.isPercentage
+      ? change * (this.factor * distance)
+      : change * this.factor;
   }
 }
 
 export class WeatherAdjustments {
   private static altitudeFactor = new SimpleAdjustmentFactor({
     factor: 0.02, // 2% adjustment per 1,000 feet
+    per: 1000,
     isPercentage: true,
   });
   private static temperatureFactor = new SimpleAdjustmentFactor({
     factor: 2, // 2 yards per 10 degrees
+    per: 10,
     isPercentage: false,
   });
 
@@ -42,10 +50,12 @@ export class WeatherAdjustments {
     currentWeather: WeatherConditions
   ): number {
     const temperatureAdjustment = this.temperatureFactor.getAdjustment(
-      currentWeather.temperature - stockWeather.temperature
+      currentWeather.temperature - stockWeather.temperature,
+      distance
     );
     const altitudeAdjustment = this.altitudeFactor.getAdjustment(
-      currentWeather.altitude - stockWeather.altitude
+      currentWeather.altitude - stockWeather.altitude,
+      distance
     );
 
     const windAdjustment = WindAdjustments.getAdjustment(
@@ -53,6 +63,12 @@ export class WeatherAdjustments {
       stockWeather.wind,
       currentWeather.wind
     );
+
+    console.log({
+      current: currentWeather.temperature,
+      stock: stockWeather.temperature,
+      adjustment: temperatureAdjustment,
+    });
 
     return temperatureAdjustment + altitudeAdjustment + windAdjustment;
   }
